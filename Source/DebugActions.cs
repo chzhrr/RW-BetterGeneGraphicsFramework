@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using System;
+using HarmonyLib;
 using JetBrains.Annotations;
 using UnityEngine;
 using Verse;
@@ -151,7 +152,7 @@ namespace BetterGeneGraphicsFramework
                         Log.Message($"Current z offset for north texture is {v.z}.");
                         Log.Message("Exposing current offsets to clipboard.");
                         TextEditor te = new TextEditor();
-                        te.text = $"({v.x}, {v.y}, {v.z})";
+                        te.text = $"({Math.Round(v.x, 2)}, {Math.Round(v.y, 2)}, {Math.Round(v.z, 2)})";
                         te.SelectAll();
                         te.Copy();
                     }
@@ -275,7 +276,7 @@ namespace BetterGeneGraphicsFramework
                         Log.Message($"Current z offset for east texture is {v.z}.");
                         Log.Message("Exposing current offsets to clipboard");
                         TextEditor te = new TextEditor();
-                        te.text = $"({v.x}, {v.y}, {v.z})";
+                        te.text = $"({Math.Round(v.x, 2)}, {Math.Round(v.y, 2)}, {Math.Round(v.z, 2)})";
                         te.SelectAll();
                         te.Copy();
                     }
@@ -399,7 +400,7 @@ namespace BetterGeneGraphicsFramework
                         Log.Message($"Current z offset for south texture is {v.z}.");
                         Log.Message("Exposing current offsets to clipboard.");
                         TextEditor te = new TextEditor();
-                        te.text = $"({v.x}, {v.y}, {v.z})";
+                        te.text = $"({Math.Round(v.x, 2)}, {Math.Round(v.y, 2)}, {Math.Round(v.z, 2)})";
                         te.SelectAll();
                         te.Copy();
                     }
