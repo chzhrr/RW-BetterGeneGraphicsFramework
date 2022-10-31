@@ -60,13 +60,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ShaderSupport.cs" />
     <Compile Include="BetterTailRendering.cs" />
     <Compile Include="BodyTypeOffset.cs" />
     <Compile Include="GraphicsWithAge.cs" />
     <Compile Include="DebugActions.cs" />
     <Compile Include="HarmonyPatcher.cs" />
     <Compile Include="Patch_BetterTailRendering.cs" />
-    <Compile Include="Patch_ResolveGraphicsWithAge.cs" />
+    <Compile Include="Patch_ResolveGraphicsWithAgeAndShader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
