@@ -15,12 +15,13 @@ namespace BetterGeneGraphicsFramework
     {
 #if DEBUG
         public static float adjustment = 0.01f;
+        public static int digits = 2;
 
         [DebugAction("PawnAttachmentsRendering", actionType = DebugActionType.ToolMapForPawns,
             allowedGameStates = AllowedGameStates.PlayingOnMap)]
         public static void Set2XAdjustment(Pawn p)
         {
-            adjustment = 0.02f;
+            adjustment *= 2;
             Log.Message($"Current adjustment is {adjustment}");
         }
 
@@ -28,7 +29,7 @@ namespace BetterGeneGraphicsFramework
             allowedGameStates = AllowedGameStates.PlayingOnMap)]
         public static void Set5XAdjustment(Pawn p)
         {
-            adjustment = 0.05f;
+            adjustment *= 5;
             Log.Message($"Current adjustment is {adjustment}");
         }
 
@@ -36,8 +37,32 @@ namespace BetterGeneGraphicsFramework
             allowedGameStates = AllowedGameStates.PlayingOnMap)]
         public static void Set10XAdjustment(Pawn p)
         {
-            adjustment = 0.1f;
+            adjustment *= 10;
             Log.Message($"Current adjustment is {adjustment}");
+        }
+
+        [DebugAction("PawnAttachmentsRendering", actionType = DebugActionType.ToolMapForPawns,
+            allowedGameStates = AllowedGameStates.PlayingOnMap)]
+        public static void SetTenthXAdjustment(Pawn p)
+        {
+            adjustment *= 0.1f;
+            Log.Message($"Current adjustment is {adjustment}");
+        }
+
+        [DebugAction("PawnAttachmentsRendering", actionType = DebugActionType.ToolMapForPawns,
+            allowedGameStates = AllowedGameStates.PlayingOnMap)]
+        public static void IncreaseCopyDigits(Pawn p)
+        {
+            digits += 1;
+            Log.Message($"Copy to clipboard set to {digits} decimal places.");
+        }
+
+        [DebugAction("PawnAttachmentsRendering", actionType = DebugActionType.ToolMapForPawns,
+            allowedGameStates = AllowedGameStates.PlayingOnMap)]
+        public static void DecreaseCopyDigits(Pawn p)
+        {
+            digits -= 1;
+            Log.Message($"Copy to clipboard set to {digits} decimal places.");
         }
 
         [DebugAction("PawnAttachmentsRendering", actionType = DebugActionType.ToolMapForPawns, allowedGameStates = AllowedGameStates.PlayingOnMap)]
@@ -152,7 +177,7 @@ namespace BetterGeneGraphicsFramework
                         Log.Message($"Current z offset for north texture is {v.z}.");
                         Log.Message("Exposing current offsets to clipboard.");
                         TextEditor te = new TextEditor();
-                        te.text = $"({Math.Round(v.x, 2)}, {Math.Round(v.y, 2)}, {Math.Round(v.z, 2)})";
+                        te.text = $"({Math.Round(v.x, digits)}, {Math.Round(v.y, digits)}, {Math.Round(v.z, digits)})";
                         te.SelectAll();
                         te.Copy();
                     }
@@ -276,7 +301,7 @@ namespace BetterGeneGraphicsFramework
                         Log.Message($"Current z offset for east texture is {v.z}.");
                         Log.Message("Exposing current offsets to clipboard");
                         TextEditor te = new TextEditor();
-                        te.text = $"({Math.Round(v.x, 2)}, {Math.Round(v.y, 2)}, {Math.Round(v.z, 2)})";
+                        te.text = $"({Math.Round(v.x, digits)}, {Math.Round(v.y, digits)}, {Math.Round(v.z, digits)})";
                         te.SelectAll();
                         te.Copy();
                     }
@@ -400,7 +425,7 @@ namespace BetterGeneGraphicsFramework
                         Log.Message($"Current z offset for south texture is {v.z}.");
                         Log.Message("Exposing current offsets to clipboard.");
                         TextEditor te = new TextEditor();
-                        te.text = $"({Math.Round(v.x, 2)}, {Math.Round(v.y, 2)}, {Math.Round(v.z, 2)})";
+                        te.text = $"({Math.Round(v.x, digits)}, {Math.Round(v.y, digits)}, {Math.Round(v.z, digits)})";
                         te.SelectAll();
                         te.Copy();
                     }
