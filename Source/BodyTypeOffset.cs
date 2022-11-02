@@ -14,5 +14,6 @@ namespace BetterGeneGraphicsFramework
         public Vector3? thin;
         public Vector3? baby;
         public Vector3? child;
+        public Vector3? femaleBB;
     }
 }

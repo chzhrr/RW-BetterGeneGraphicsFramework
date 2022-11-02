@@ -60,6 +60,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FemaleBBBodyTypeSupport.cs" />
     <Compile Include="ShaderSupport.cs" />
     <Compile Include="BetterTailRendering.cs" />
     <Compile Include="BodyTypeOffset.cs" />

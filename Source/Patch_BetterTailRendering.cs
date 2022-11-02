@@ -149,6 +149,10 @@ namespace BetterGeneGraphicsFramework
                 {
                     return bodyTypeOffset.child ?? Vector3.zero;
                 }
+                if (pawn.story.bodyType == FemaleBBBodyTypeSupport.FemaleBodyTypeDef)
+                {
+                    return bodyTypeOffset.femaleBB ?? Vector3.zero;
+                }
             }
             return Vector3.zero;
         }
