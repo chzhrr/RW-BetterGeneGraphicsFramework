@@ -182,13 +182,26 @@ namespace BetterGeneGraphicsFramework
                 }
                 return _color;
             }
-
+            bool CanDraw(string bodyPartExpression)
+            {
+                var bodyPartsRequests = bodyPartExpression.Split('|');
+                foreach (var request in bodyPartsRequests)
+                {
+                    if (
+                        pawn.kindDef.missingParts.Any(x => x.BodyPart.defName.Equals(request.Replace("!", string.Empty), System.StringComparison.OrdinalIgnoreCase))
+                        != //XOR
+                        !request.StartsWith("!"))
+                        return false;
+                }
+                return true;
+            }
             string GraphicPathFor()
             {
                 GraphicsWithAge extension = gene.def.GetModExtension<GraphicsWithAge>();
                 if (extension != null)
                 {
                     List<float> ages = extension.ages;
+                    List<string> bodyPartExpressions = extension.bodyPartExpressions;
                     List<string> paths;
                     if (pawn.gender == Gender.Female && extension.graphicPathsFemale != null)
                     {
@@ -206,7 +219,8 @@ namespace BetterGeneGraphicsFramework
                          j < ageStage * texCountPerAgeStage + texCountPerAgeStage;
                          j++)
                     {
-                        allowedPaths.Add(paths[j]);
+                        if (bodyPartExpressions.Count == 0 || CanDraw(bodyPartExpressions[j % bodyPartExpressions.Count]))
+                            allowedPaths.Add(paths[j]);
                     }
 
                     return allowedPaths[pawn.thingIDNumber % allowedPaths.Count];
