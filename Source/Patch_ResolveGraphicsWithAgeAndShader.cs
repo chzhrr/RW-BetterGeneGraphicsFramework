@@ -136,7 +136,6 @@ namespace BetterGeneGraphicsFramework
             Color color = GetColor();
             Color colorTwo = GetColorTwo();
             string path = GraphicPathFor();
-
             Graphic item = GraphicDatabase.Get<Graphic_Multi>(color: color, path: path, shader: shader,
                 drawSize: Vector2.one, colorTwo: colorTwo);
             Graphic item2 = GraphicDatabase.Get<Graphic_Multi>(path, shader, Vector2.one,
@@ -200,10 +199,17 @@ namespace BetterGeneGraphicsFramework
                         !=
                         expectHediff
                         )
+                    {
+                        Log.Message($"Expression: {bodyPartExpression}\nHediffs:\n{hediffsToString()}\nFailed on request:{request}");
                         return false;
+                    }
                 }
 
                 return true;
+            }
+            string hediffsToString()
+            {
+                return string.Join("\n", BodyPartHediffs().Select(x => $"\"{x.Item1 ?? "General"}\" - \"{x.Item2}\""));
             }
             IEnumerable<(string, string)> BodyPartHediffs()
             {
@@ -240,6 +246,7 @@ namespace BetterGeneGraphicsFramework
                         if (bodyPartExpressions.Count == 0 || CheckExpressionForPawn(bodyPartExpressions[j % bodyPartExpressions.Count]))
                             allowedPaths.Add(paths[j]);
                     }
+                    Log.Message($"allowed paths {allowedPaths.Count}: {string.Join(", ",allowedPaths)}");
                     if (allowedPaths.Count == 0)
                         VanillaGetGraphicPathFor();
                     return allowedPaths[pawn.thingIDNumber % allowedPaths.Count];
