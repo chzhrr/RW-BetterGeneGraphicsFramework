@@ -11,5 +11,6 @@ namespace BetterGeneGraphicsFramework
         public List<float> ages;
         public List<string> graphicPaths;
         public List<string> graphicPathsFemale;
+        public List<string> bodyPartExpressions;
     }
 }

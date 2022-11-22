@@ -140,6 +140,7 @@ namespace BetterGeneGraphicsFramework
                 drawSize: Vector2.one, colorTwo: colorTwo);
             Graphic item2 = GraphicDatabase.Get<Graphic_Multi>(path, shader, Vector2.one,
                 gene.def.graphicData.color ?? rottingColor, colorTwo);
+
             return (item, item2);
 
             Color GetColor()
@@ -182,13 +183,44 @@ namespace BetterGeneGraphicsFramework
                 }
                 return _color;
             }
+            bool CheckExpressionForPawn(string bodyPartExpression)
+            {
+                var bodyPartsRequests = bodyPartExpression.Split('|');
+                foreach (var request in bodyPartsRequests)
+                {
+                    var spliterIndex = request.IndexOf("--");
+                    string hediff = spliterIndex < 0 ? "MissingBodyPart" : request.Substring(spliterIndex + 3);
+                    string bodyPart = spliterIndex < 0 ? request.Replace("!", string.Empty) : request.Substring(0, spliterIndex - 1).Replace("!", string.Empty);
+                    bool expectHediff = (spliterIndex < 0 && request.StartsWith("!")) || (spliterIndex >= 0 && !request.StartsWith("!"));
+                    if (
+                        BodyPartHediffs().Any(x =>
+                        (x.Item1?.Equals(bodyPart, System.StringComparison.OrdinalIgnoreCase) ?? bodyPart.Equals("Global", System.StringComparison.OrdinalIgnoreCase))
+                        && x.Item2.Equals(hediff, System.StringComparison.OrdinalIgnoreCase))
+                        !=
+                        expectHediff
+                        )
+                    {
+                        return false;
+                    }
+                }
 
+                return true;
+            }
+            IEnumerable<(string, string)> BodyPartHediffs()
+            {
+                List<(string, string)> res = new List<(string, string)>();
+                if (pawn?.health?.hediffSet == null)
+                    return res;
+                res.AddRange(pawn.health.hediffSet.hediffs.Select(x => (x.Part?.untranslatedCustomLabel, x.def?.defName)));
+                return res;
+            }
             string GraphicPathFor()
             {
                 GraphicsWithAge extension = gene.def.GetModExtension<GraphicsWithAge>();
                 if (extension != null)
                 {
                     List<float> ages = extension.ages;
+                    List<string> bodyPartExpressions = extension.bodyPartExpressions;
                     List<string> paths;
                     if (pawn.gender == Gender.Female && extension.graphicPathsFemale != null)
                     {
@@ -206,9 +238,11 @@ namespace BetterGeneGraphicsFramework
                          j < ageStage * texCountPerAgeStage + texCountPerAgeStage;
                          j++)
                     {
-                        allowedPaths.Add(paths[j]);
+                        if (bodyPartExpressions.Count == 0 || CheckExpressionForPawn(bodyPartExpressions[j % bodyPartExpressions.Count]))
+                            allowedPaths.Add(paths[j]);
                     }
-
+                    if (allowedPaths.Count == 0)
+                        VanillaGetGraphicPathFor();
                     return allowedPaths[pawn.thingIDNumber % allowedPaths.Count];
                 }
                 else
