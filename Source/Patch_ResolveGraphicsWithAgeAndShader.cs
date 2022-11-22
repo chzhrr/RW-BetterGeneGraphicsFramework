@@ -106,8 +106,8 @@ namespace BetterGeneGraphicsFramework
             {
                 GraphicsWithAge graphicsWithAgeExt = def.GetModExtension<GraphicsWithAge>();
                 return graphicsWithAgeExt != null &&
-                                             (graphicsWithAgeExt.graphicPaths != null ||
-                                              graphicsWithAgeExt.graphicPathsFemale != null);
+                                             (!graphicsWithAgeExt.graphicPaths.NullOrEmpty() ||
+                                              !graphicsWithAgeExt.graphicPathsFemale.NullOrEmpty());
             }
             bool HasShaderSupportExt()
             {
@@ -222,7 +222,7 @@ namespace BetterGeneGraphicsFramework
                     List<float> ages = extension.ages;
                     List<string> bodyPartExpressions = extension.bodyPartExpressions;
                     List<string> paths;
-                    if (pawn.gender == Gender.Female && extension.graphicPathsFemale != null)
+                    if (pawn.gender == Gender.Female && !extension.graphicPathsFemale.NullOrEmpty())
                     {
                         paths = extension.graphicPathsFemale;
                     }
@@ -238,11 +238,11 @@ namespace BetterGeneGraphicsFramework
                          j < ageStage * texCountPerAgeStage + texCountPerAgeStage;
                          j++)
                     {
-                        if (bodyPartExpressions.Count == 0 || CheckExpressionForPawn(bodyPartExpressions[j % bodyPartExpressions.Count]))
+                        if (bodyPartExpressions.NullOrEmpty() || CheckExpressionForPawn(bodyPartExpressions[j % bodyPartExpressions.Count]))
                             allowedPaths.Add(paths[j]);
                     }
                     if (allowedPaths.Count == 0)
-                        VanillaGetGraphicPathFor();
+                        return VanillaGetGraphicPathFor();
                     return allowedPaths[pawn.thingIDNumber % allowedPaths.Count];
                 }
                 else

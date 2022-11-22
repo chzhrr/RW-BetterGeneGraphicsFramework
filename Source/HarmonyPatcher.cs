@@ -1,6 +1,5 @@
 ﻿using HarmonyLib;
 using JetBrains.Annotations;
-using System;
 using Verse;
 
 namespace BetterGeneGraphicsFramework
@@ -9,28 +8,64 @@ namespace BetterGeneGraphicsFramework
     [UsedImplicitly]
     public class HarmonyPatcher
     {
+        public static GeneGraphicsHelper helper;
+
         static HarmonyPatcher()
         {
             var harmony = new Harmony("Telardo.BetterGeneGraphicsFramework");
             harmony.PatchAll();
+            // hediff graphics functionality
             harmony.Patch(AccessTools.Method(typeof(Pawn), nameof(Pawn.PostApplyDamage)),
                 postfix: new HarmonyMethod(typeof(HarmonyPatcher), nameof(PostApplyDamage)));
-            harmony.Patch(AccessTools.Method(typeof(Pawn_HealthTracker), nameof(Pawn_HealthTracker.Notify_HediffChanged)),
-                postfix: new HarmonyMethod(typeof(HarmonyPatcher), nameof(HediffChangedPostfix)));
+            harmony.Patch(AccessTools.Method(typeof(Hediff), nameof(Hediff.PostAdd)),
+                postfix: new HarmonyMethod(typeof(HarmonyPatcher), nameof(RedrawWhenHediffPostAdd)));
+            harmony.Patch(AccessTools.Method(typeof(Hediff), nameof(Hediff.PostRemoved)),
+                postfix: new HarmonyMethod(typeof(HarmonyPatcher), nameof(RedrawWhenHediffPostRemove)));
+            harmony.Patch(AccessTools.Method(typeof(Gene), nameof(Gene.PostAdd)),
+                postfix: new HarmonyMethod(typeof(HarmonyPatcher), nameof(RegisterWhenGenePostAdd)));
+            harmony.Patch(AccessTools.Method(typeof(Gene), nameof(Gene.PostRemove)),
+                postfix: new HarmonyMethod(typeof(HarmonyPatcher), nameof(DeregisterWhenGenePostRemove)));
         }
 
-        
-        private static void PostApplyDamage(Pawn __instance,DamageInfo dinfo, float totalDamageDealt)
+        private static void RegisterWhenGenePostAdd(Gene __instance)
         {
-            
-            if(__instance.RaceProps.Humanlike)
-                __instance?.Drawer?.renderer?.graphics?.SetAllGraphicsDirty();
+            GraphicsWithAge graphicsWithAgeExt = __instance.def.GetModExtension<GraphicsWithAge>();
+            if (graphicsWithAgeExt != null && !graphicsWithAgeExt.bodyPartExpressions.NullOrEmpty())
+            {
+                helper.AddPawn(__instance.pawn);
+            }
         }
-        private static void HediffChangedPostfix(Hediff hediff)
+
+        private static void DeregisterWhenGenePostRemove(Gene __instance)
         {
-            Pawn pawn = hediff?.pawn;
-            if(pawn?.RaceProps?.Humanlike??false)
-                pawn?.Drawer?.renderer?.graphics?.SetAllGraphicsDirty();
+            GraphicsWithAge graphicsWithAgeExt = __instance.def.GetModExtension<GraphicsWithAge>();
+            if (graphicsWithAgeExt != null && !graphicsWithAgeExt.bodyPartExpressions.NullOrEmpty())
+            {
+                helper.RemovePawn(__instance.pawn);
+            }
+        }
+
+        private static void PostApplyDamage(Pawn __instance)
+        {
+            RedrawWhenHediffChanged(__instance);
+        }
+
+        private static void RedrawWhenHediffPostAdd(Hediff __instance)
+        {
+            RedrawWhenHediffChanged(__instance?.pawn);
+        }
+
+        private static void RedrawWhenHediffPostRemove(Hediff __instance)
+        {
+            RedrawWhenHediffChanged(__instance?.pawn);
+        }
+
+        private static void RedrawWhenHediffChanged(Pawn pawn)
+        {
+            if (helper.ShouldRedrawWhenHediffChange(pawn))
+            {
+                pawn.Drawer.renderer.graphics.SetGeneGraphicsDirty();
+            }
         }
     }
 }
