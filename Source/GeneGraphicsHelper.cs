@@ -26,11 +26,6 @@ namespace BetterGeneGraphicsFramework
             pawnList.Remove(pawn.GetUniqueLoadID());
         }
 
-        public override void FinalizeInit()
-        {
-            HarmonyPatcher.helper = Current.Game.GetComponent<GeneGraphicsHelper>();
-        }
-
         public override void ExposeData()
         {
             base.ExposeData();

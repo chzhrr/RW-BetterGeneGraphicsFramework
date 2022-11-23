@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using JetBrains.Annotations;
+using RimWorld;
 using Verse;
 
 namespace BetterGeneGraphicsFramework
@@ -8,15 +9,15 @@ namespace BetterGeneGraphicsFramework
     [UsedImplicitly]
     public class HarmonyPatcher
     {
-        public static GeneGraphicsHelper helper;
+        private static GeneGraphicsHelper helper;
+
+        public static GeneGraphicsHelper Helper => helper ?? (helper = Current.Game.GetComponent<GeneGraphicsHelper>());
 
         static HarmonyPatcher()
         {
             var harmony = new Harmony("Telardo.BetterGeneGraphicsFramework");
             harmony.PatchAll();
             // hediff graphics functionality
-            harmony.Patch(AccessTools.Method(typeof(Pawn), nameof(Pawn.PostApplyDamage)),
-                postfix: new HarmonyMethod(typeof(HarmonyPatcher), nameof(PostApplyDamage)));
             harmony.Patch(AccessTools.Method(typeof(Hediff), nameof(Hediff.PostAdd)),
                 postfix: new HarmonyMethod(typeof(HarmonyPatcher), nameof(RedrawWhenHediffPostAdd)));
             harmony.Patch(AccessTools.Method(typeof(Hediff), nameof(Hediff.PostRemoved)),
@@ -32,7 +33,7 @@ namespace BetterGeneGraphicsFramework
             GraphicsWithAge graphicsWithAgeExt = __instance.def.GetModExtension<GraphicsWithAge>();
             if (graphicsWithAgeExt != null && !graphicsWithAgeExt.bodyPartExpressions.NullOrEmpty())
             {
-                helper.AddPawn(__instance.pawn);
+                Helper.AddPawn(__instance.pawn);
             }
         }
 
@@ -41,13 +42,8 @@ namespace BetterGeneGraphicsFramework
             GraphicsWithAge graphicsWithAgeExt = __instance.def.GetModExtension<GraphicsWithAge>();
             if (graphicsWithAgeExt != null && !graphicsWithAgeExt.bodyPartExpressions.NullOrEmpty())
             {
-                helper.RemovePawn(__instance.pawn);
+                Helper.RemovePawn(__instance.pawn);
             }
-        }
-
-        private static void PostApplyDamage(Pawn __instance)
-        {
-            RedrawWhenHediffChanged(__instance);
         }
 
         private static void RedrawWhenHediffPostAdd(Hediff __instance)
@@ -62,7 +58,7 @@ namespace BetterGeneGraphicsFramework
 
         private static void RedrawWhenHediffChanged(Pawn pawn)
         {
-            if (helper.ShouldRedrawWhenHediffChange(pawn))
+            if (Helper.ShouldRedrawWhenHediffChange(pawn))
             {
                 pawn.Drawer.renderer.graphics.SetGeneGraphicsDirty();
             }
