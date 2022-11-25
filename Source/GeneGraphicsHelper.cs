@@ -5,7 +5,7 @@ namespace BetterGeneGraphicsFramework
 {
     public class GeneGraphicsHelper : GameComponent
     {
-        public List<string> pawnList = new List<string>();
+        public HashSet<Pawn> pawnList = new HashSet<Pawn>();
 
         public GeneGraphicsHelper(Game game)
         {
@@ -13,23 +13,30 @@ namespace BetterGeneGraphicsFramework
 
         public bool ShouldRedrawWhenHediffChange(Pawn pawn)
         {
-            return pawnList.Contains(pawn?.GetUniqueLoadID());
+            return pawn != null && pawnList.Contains(pawn);
         }
 
         public void AddPawn(Pawn pawn)
         {
-            pawnList.Add(pawn.GetUniqueLoadID());
+            if (pawn != null)
+            {
+                pawnList.Add(pawn);
+            }
         }
 
         public void RemovePawn(Pawn pawn)
         {
-            pawnList.Remove(pawn.GetUniqueLoadID());
+            pawnList.Remove(pawn);
         }
 
         public override void ExposeData()
         {
             base.ExposeData();
-            Scribe_Collections.Look(ref pawnList, "pawnList");
+            Scribe_Collections.Look(ref pawnList, saveDestroyedThings: false, "pawnList", LookMode.Reference);
+            if (Scribe.mode == LoadSaveMode.PostLoadInit)
+            {
+                pawnList.RemoveWhere((Pawn x) => x == null);
+            }
         }
     }
 }
