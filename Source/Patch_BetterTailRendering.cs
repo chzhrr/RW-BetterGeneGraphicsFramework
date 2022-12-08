@@ -17,6 +17,7 @@ namespace BetterGeneGraphicsFramework
     [UsedImplicitly]
     public static class Patch_BetterTailRendering
     {
+        [HarmonyPriority(1000)]
         [HarmonyTranspiler]
         public static IEnumerable<CodeInstruction> RemoveBodyTypeScaleAndAddBodyTypeOffset(IEnumerable<CodeInstruction> instructions)
         {
