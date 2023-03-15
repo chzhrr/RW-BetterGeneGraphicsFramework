@@ -19,8 +19,20 @@ namespace BetterGeneGraphicsFramework
     {
         [HarmonyPriority(1000)]
         [HarmonyTranspiler]
-        public static IEnumerable<CodeInstruction> RemoveBodyTypeScaleAndAddBodyTypeOffset(IEnumerable<CodeInstruction> instructions)
+        public static IEnumerable<CodeInstruction> RemoveBodyTypeScaleAndAddBodyTypeOffset(
+            IEnumerable<CodeInstruction> instructions)
         {
+            /* Task: 
+             * Insert
+             * PostProcess(GeneDef geneDef, Pawn pawn, Rot4 bodyFacing, ref float num, ref Vector2 bodyGraphicScale, ref Vector3 v)
+             *
+             * Between
+             * Vector3 v = graphicData.DrawOffsetAt(bodyFacing);
+             *
+             * And
+             * v.x *= bodyGraphicScale.x;
+             * v.z *= bodyGraphicScale.y;
+             */
             MethodInfo drawOffsetAtMI = typeof(GeneGraphicData).GetMethod(nameof(GeneGraphicData.DrawOffsetAt));
             MethodInfo postProcessMI =
                 typeof(Patch_BetterTailRendering).GetMethod(nameof(Patch_BetterTailRendering.PostProcess));
@@ -28,21 +40,28 @@ namespace BetterGeneGraphicsFramework
             int index = codes.FindIndex((x) => x.Calls(drawOffsetAtMI));
             codes.InsertRange(index + 2, new List<CodeInstruction>()
             {
+                // geneGraphic.sourceGene.def
                 new CodeInstruction(OpCodes.Ldloc_3),
-                CodeInstruction.LoadField(typeof(GeneGraphicRecord),nameof(GeneGraphicRecord.sourceGene)),
-                CodeInstruction.LoadField(typeof(Gene),nameof(Gene.def)),
+                CodeInstruction.LoadField(typeof(GeneGraphicRecord), nameof(GeneGraphicRecord.sourceGene)),
+                CodeInstruction.LoadField(typeof(Gene), nameof(Gene.def)),
+                // pawn
                 new CodeInstruction(OpCodes.Ldarg_0),
-                CodeInstruction.LoadField(typeof(PawnRenderer),"pawn"),
-                new CodeInstruction(OpCodes.Ldarg_S,4),
-                new CodeInstruction(OpCodes.Ldloca,1),
-                new CodeInstruction(OpCodes.Ldloc_0),
-                new CodeInstruction(OpCodes.Ldloca_S,5),
-                new CodeInstruction(OpCodes.Call,postProcessMI)
+                CodeInstruction.LoadField(typeof(PawnRenderer), "pawn"),
+                // bodyFacing
+                new CodeInstruction(OpCodes.Ldarg_S, 4),
+                // num, scale
+                new CodeInstruction(OpCodes.Ldloca, 1),
+                // bodyGraphicScale
+                new CodeInstruction(OpCodes.Ldloca, 0),
+                // v, offsets
+                new CodeInstruction(OpCodes.Ldloca_S, 5),
+                new CodeInstruction(OpCodes.Call, postProcessMI)
             });
             return codes;
         }
 
-        public static void PostProcess(GeneDef geneDef, Pawn pawn, Rot4 bodyFacing, ref float num, Vector2 bodyGraphicScale, ref Vector3 v)
+        public static void PostProcess(GeneDef geneDef, Pawn pawn, Rot4 bodyFacing, ref float num,
+            ref Vector2 bodyGraphicScale, ref Vector3 v)
         {
             BetterTailRendering extension = geneDef.GetModExtension<BetterTailRendering>();
             if (extension != null)
@@ -73,46 +92,46 @@ namespace BetterGeneGraphicsFramework
             {
                 // North
                 case 0:
+                {
+                    if (extension.bodyTypeOffsetNorth != null)
                     {
-                        if (extension.bodyTypeOffsetNorth != null)
-                        {
-                            return GetBodyTypeOffset(pawn, extension.bodyTypeOffsetNorth);
-                        }
-
-                        return Vector3.zero;
+                        return GetBodyTypeOffset(pawn, extension.bodyTypeOffsetNorth);
                     }
+
+                    return Vector3.zero;
+                }
 
                 case 1:
+                {
+                    if (extension.bodyTypeOffsetEast != null)
                     {
-                        if (extension.bodyTypeOffsetEast != null)
-                        {
-                            return GetBodyTypeOffset(pawn, extension.bodyTypeOffsetEast);
-                        }
-
-                        return Vector3.zero;
+                        return GetBodyTypeOffset(pawn, extension.bodyTypeOffsetEast);
                     }
+
+                    return Vector3.zero;
+                }
 
                 case 2:
+                {
+                    if (extension.bodyTypeOffsetSouth != null)
                     {
-                        if (extension.bodyTypeOffsetSouth != null)
-                        {
-                            return GetBodyTypeOffset(pawn, extension.bodyTypeOffsetSouth);
-                        }
-
-                        return Vector3.zero;
+                        return GetBodyTypeOffset(pawn, extension.bodyTypeOffsetSouth);
                     }
+
+                    return Vector3.zero;
+                }
 
                 case 3:
+                {
+                    if (extension.bodyTypeOffsetEast != null)
                     {
-                        if (extension.bodyTypeOffsetEast != null)
-                        {
-                            Vector3 result = GetBodyTypeOffset(pawn, extension.bodyTypeOffsetEast);
-                            result.x *= -1f;
-                            return result;
-                        }
-
-                        return Vector3.zero;
+                        Vector3 result = GetBodyTypeOffset(pawn, extension.bodyTypeOffsetEast);
+                        result.x *= -1f;
+                        return result;
                     }
+
+                    return Vector3.zero;
+                }
                 default:
                     return Vector3.zero;
             }

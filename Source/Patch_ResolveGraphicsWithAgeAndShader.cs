@@ -16,28 +16,29 @@ namespace BetterGeneGraphicsFramework
     [UsedImplicitly]
     public static class Patch_ResolveGraphicsWithAgeAndShader
     {
-        /// <summary>
-        /// Too hard to explain.
-        /// </summary>
         [HarmonyTranspiler]
-        public static IEnumerable<CodeInstruction> ResolveGraphicsWithAgeAndShader(IEnumerable<CodeInstruction> instructions,
+        public static IEnumerable<CodeInstruction> ResolveGraphicsWithAgeAndShader(
+            IEnumerable<CodeInstruction> instructions,
             ILGenerator generator)
         {
-            // Task: Replace
-            //if (item.def.HasGraphic && item.Active)
-            //{
-            //    (Graphic, Graphic) graphics = item.def.graphicData.GetGraphics(pawn, skinShader, rottingColor);
-            //    geneGraphics.Add(new GeneGraphicRecord(graphics.Item1, graphics.Item2, item));
-            //}
-            // With
-            //if (item.def.HasGraphic && item.Active)
-            //{
-            //    (Graphic, Graphic) graphics =
-            //        ((!Patch_ResolveGraphicsWithAgeAndShader.HasModDefExtensions(item.def) ?
-            //            item.def.graphicData.GetGraphics(pawn, skinShader, rottingColor) :
-            //            Patch_ResolveGraphicsWithAgeAndShader.ResolveGraphics(pawn, item, skinShader, rottingColor));
-            //    geneGraphics.Add(new GeneGraphicRecord(graphics.Item1, graphics.Item2, item));
-            //}
+            /* Task:
+             * Replace
+             * if (item.def.HasGraphic && item.Active)
+             * {
+             *     (Graphic, Graphic) graphics = item.def.graphicData.GetGraphics(pawn, skinShader, rottingColor);
+             *  geneGraphics.Add(new GeneGraphicRecord(graphics.Item1, graphics.Item2, item));
+             * }
+             *
+             * With
+             * if (item.def.HasGraphic && item.Active)
+             * {
+             *     (Graphic, Graphic) graphics =
+             *          ((!Patch_ResolveGraphicsWithAgeAndShader.HasModDefExtensions(item.def) ?
+             *          item.def.graphicData.GetGraphics(pawn, skinShader, rottingColor) :
+             *          Patch_ResolveGraphicsWithAgeAndShader.ResolveGraphics(pawn, item, skinShader, rottingColor));
+             *     geneGraphics.Add(new GeneGraphicRecord(graphics.Item1, graphics.Item2, item));
+             * }
+             */
 
             MethodInfo geneActiveGetter = AccessTools.DeclaredPropertyGetter(typeof(Gene), nameof(Gene.Active));
             MethodInfo hasOurExtensionMI =
@@ -90,7 +91,7 @@ namespace BetterGeneGraphicsFramework
                     yield return new CodeInstruction(OpCodes.Nop);
                     // since we have resolve the path with our method, we need to skip the vanilla method and jump to our trueTransferLabel
                     yield return new CodeInstruction(OpCodes.Br_S, trueTransferLabel);
-                    // count from il, we need to skip 10 il instructions
+                    // count from IL, we need to skip 10 IL instructions
                     index = i + 10;
                     // add a new nop instruction so that if the def don't have extension it will use vanilla resolve method
                     yield return new CodeInstruction(OpCodes.Nop).WithLabels(falseTransferLabel);
@@ -106,9 +107,10 @@ namespace BetterGeneGraphicsFramework
             {
                 GraphicsWithAge graphicsWithAgeExt = def.GetModExtension<GraphicsWithAge>();
                 return graphicsWithAgeExt != null &&
-                                             (!graphicsWithAgeExt.graphicPaths.NullOrEmpty() ||
-                                              !graphicsWithAgeExt.graphicPathsFemale.NullOrEmpty());
+                       (!graphicsWithAgeExt.graphicPaths.NullOrEmpty() ||
+                        !graphicsWithAgeExt.graphicPathsFemale.NullOrEmpty());
             }
+
             bool HasShaderSupportExt()
             {
                 ShaderSupport shaderSupportExt = def.GetModExtension<ShaderSupport>();
@@ -135,7 +137,7 @@ namespace BetterGeneGraphicsFramework
             GeneGraphicData geneGraphicData = gene.def.graphicData;
             Color color = GetColor();
             Color colorTwo = GetColorTwo();
-            string path = GraphicPathFor();
+            string path = GraphicPathForGene();
             Graphic item = GraphicDatabase.Get<Graphic_Multi>(color: color, path: path, shader: shader,
                 drawSize: Vector2.one, colorTwo: colorTwo);
             Graphic item2 = GraphicDatabase.Get<Graphic_Multi>(path, shader, Vector2.one,
@@ -143,17 +145,21 @@ namespace BetterGeneGraphicsFramework
 
             return (item, item2);
 
+            #region shader support
+
             Color GetColor()
             {
-                var _color = hasShaderSupportExt ? GetColorForGeneColorType(shaderSupportExt.colorType, shaderSupportExt.color)
-                                                 : GetColorFromGraphicData();
+                var _color = hasShaderSupportExt
+                    ? GetColorForGeneColorType(shaderSupportExt.colorType, shaderSupportExt.color)
+                    : GetColorFromGraphicData();
                 return _color;
             }
 
             Color GetColorTwo()
             {
-                var _colorTwo = hasShaderSupportExt ? GetColorForGeneColorType(shaderSupportExt.colorTwoType, shaderSupportExt.colorTwo)
-                                                    : Color.white;
+                var _colorTwo = hasShaderSupportExt
+                    ? GetColorForGeneColorType(shaderSupportExt.colorTwoType, shaderSupportExt.colorTwo)
+                    : Color.white;
                 return _colorTwo;
             }
 
@@ -166,26 +172,31 @@ namespace BetterGeneGraphicsFramework
 
             Color GetColorForGeneColorType(GeneColorType geneColorType, Color defaultColor)
             {
-                Color _color;
                 switch (geneColorType)
                 {
                     case GeneColorType.Hair:
-                        _color = pawn.story.HairColor;
-                        break;
+                        return pawn.story.HairColor;
 
                     case GeneColorType.Skin:
-                        _color = pawn.story.SkinColor;
-                        break;
+                        return pawn.story.SkinColor;
 
                     default:
-                        _color = defaultColor;
-                        break;
+                        return defaultColor;
                 }
-                return _color;
             }
-            bool CheckExpressionForPawn(string bodyPartExpression)
+
+            #endregion
+
+            #region hediff texturing
+
+            bool CheckExpressionForPawn(string bodyPartExpression, List<(string, string)> bodyPartHediffs)
             {
                 var bodyPartsRequests = bodyPartExpression.Split('|');
+                if (bodyPartsRequests.Length == 0)
+                {
+                    Log.ErrorOnce("[Better Gene Graphics Framework] Bad body part expression detected!", 195007889);
+                }
+
                 foreach (var request in bodyPartsRequests)
                 {
                     var spliterIndex = request.IndexOf("--");
@@ -214,13 +225,17 @@ namespace BetterGeneGraphicsFramework
                 res.AddRange(pawn.health.hediffSet.hediffs.Select(x => (x.Part?.untranslatedCustomLabel, x.def?.defName)));
                 return res;
             }
-            string GraphicPathFor()
+
+            #endregion
+
+            string GraphicPathForGene()
             {
                 GraphicsWithAge extension = gene.def.GetModExtension<GraphicsWithAge>();
                 if (extension != null)
                 {
                     List<float> ages = extension.ages;
                     List<string> bodyPartExpressions = extension.bodyPartExpressions;
+
                     List<string> paths;
                     if (pawn.gender == Gender.Female && !extension.graphicPathsFemale.NullOrEmpty())
                     {
@@ -238,18 +253,21 @@ namespace BetterGeneGraphicsFramework
                          j < ageStage * texCountPerAgeStage + texCountPerAgeStage;
                          j++)
                     {
-                        if (bodyPartExpressions.NullOrEmpty() || CheckExpressionForPawn(bodyPartExpressions[j % bodyPartExpressions.Count]))
+                        if (bodyPartExpressions.NullOrEmpty() ||
+                            CheckExpressionForPawn(bodyPartExpressions[j % bodyPartExpressions.Count], bodyPartHediffs))
+                        {
                             allowedPaths.Add(paths[j]);
+                        }
                     }
                     if (allowedPaths.Count == 0)
+                    {
                         return VanillaGetGraphicPathFor();
+                    }
                     return allowedPaths[pawn.thingIDNumber % allowedPaths.Count];
                 }
-                else
-                {
-                    return VanillaGetGraphicPathFor();
-                }
+                return VanillaGetGraphicPathFor();
 
+                // copy from GeneGraphicData.GetGraphicPathFor() since it's private.
                 string VanillaGetGraphicPathFor()
                 {
                     if (!geneGraphicData.graphicPaths.NullOrEmpty())

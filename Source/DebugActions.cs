@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using HarmonyLib;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -10,6 +11,9 @@ using Verse;
 
 namespace BetterGeneGraphicsFramework
 {
+    /// <summary>
+    /// Offset helpers.
+    /// </summary>
     [UsedImplicitly]
     public static class DebugActions
     {
@@ -436,6 +440,20 @@ namespace BetterGeneGraphicsFramework
                 }
             }
         }
+
+        //[DebugAction("PawnAttachmentsRendering", actionType = DebugActionType.ToolMapForPawns, allowedGameStates = AllowedGameStates.PlayingOnMap)]
+        //private static void LogHediffParts(Pawn pawn)
+        //{
+        //    if (pawn.health?.hediffSet == null)
+        //    {
+        //        return;
+        //    }
+        //    foreach (Hediff hediff in pawn.health.hediffSet.hediffs)
+        //    {
+        //        Log.Message("Part:" + hediff.Part?.untranslatedCustomLabel);
+        //        Log.Message("Def name:" + hediff.def?.defName);
+        //    }
+        //}
     }
 
 #endif
