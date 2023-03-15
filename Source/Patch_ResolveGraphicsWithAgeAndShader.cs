@@ -199,30 +199,37 @@ namespace BetterGeneGraphicsFramework
 
                 foreach (var request in bodyPartsRequests)
                 {
-                    var spliterIndex = request.IndexOf("--");
-                    string hediff = spliterIndex < 0 ? "MissingBodyPart" : request.Substring(spliterIndex + 3);
-                    string bodyPart = spliterIndex < 0 ? request.Replace("!", string.Empty) : request.Substring(0, spliterIndex - 1).Replace("!", string.Empty);
-                    bool expectHediff = (spliterIndex < 0 && request.StartsWith("!")) || (spliterIndex >= 0 && !request.StartsWith("!"));
-                    if (
-                        BodyPartHediffs().Any(x =>
-                        (x.Item1?.Equals(bodyPart, System.StringComparison.OrdinalIgnoreCase) ?? bodyPart.Equals("Global", System.StringComparison.OrdinalIgnoreCase))
-                        && x.Item2.Equals(hediff, System.StringComparison.OrdinalIgnoreCase))
-                        !=
-                        expectHediff
-                        )
+                    int dlmIndex = request.IndexOf("--");
+                    bool isMissingBodyPart = dlmIndex < 0;
+                    string hediff = isMissingBodyPart ? "MissingBodyPart" : request.Substring(dlmIndex + 3);
+                    string bodyPart = isMissingBodyPart
+                        ? request.Replace("!", string.Empty)
+                        : request.Substring(0, dlmIndex).Replace("!", string.Empty);
+
+                    // hediff exists when !bodyPart (Missing hediff)
+                    // or Global-- hediff
+                    bool expectHediff = (isMissingBodyPart && request.StartsWith("!")) ||
+                                        (!isMissingBodyPart && !request.StartsWith("!"));
+
+                    if (bodyPartHediffs.Any(x =>
+                            (x.Item1?.Equals(bodyPart, System.StringComparison.OrdinalIgnoreCase) ??
+                             bodyPart.Equals("Global", System.StringComparison.OrdinalIgnoreCase))
+                            && x.Item2.Equals(hediff, System.StringComparison.OrdinalIgnoreCase))
+                        != expectHediff)
                     {
                         return false;
                     }
                 }
-
                 return true;
             }
-            IEnumerable<(string, string)> BodyPartHediffs()
+
+            List<(string, string)> BodyPartHediffs()
             {
                 List<(string, string)> res = new List<(string, string)>();
-                if (pawn?.health?.hediffSet == null)
+                if (pawn.health?.hediffSet == null)
                     return res;
-                res.AddRange(pawn.health.hediffSet.hediffs.Select(x => (x.Part?.untranslatedCustomLabel, x.def?.defName)));
+                res.AddRange(
+                    pawn.health.hediffSet.hediffs.Select(x => (x.Part?.untranslatedCustomLabel, x.def?.defName)));
                 return res;
             }
 
@@ -248,7 +255,20 @@ namespace BetterGeneGraphicsFramework
 
                     List<string> allowedPaths = new List<string>();
                     int texCountPerAgeStage = paths.Count / ages.Count;
-                    int ageStage = ages.FindLastIndex((x) => x < pawn.ageTracker.AgeBiologicalYearsFloat);
+                    // left inclusive
+                    int ageStage = ages.FindLastIndex((x) => x <= pawn.ageTracker.AgeBiologicalYearsFloat);
+                    if (ageStage == -1)
+                    {
+                        Log.ErrorOnce(
+                            "[Better Gene Graphics Framework] Pawn's age is not in ages, check your ages settings!",
+                            111031659);
+                        return VanillaGetGraphicPathFor();
+                    }
+                    List<(string, string)> bodyPartHediffs = new List<(string, string)>();
+                    if (!bodyPartExpressions.NullOrEmpty())
+                    {
+                        bodyPartHediffs = BodyPartHediffs();
+                    }
                     for (int j = ageStage * texCountPerAgeStage;
                          j < ageStage * texCountPerAgeStage + texCountPerAgeStage;
                          j++)
