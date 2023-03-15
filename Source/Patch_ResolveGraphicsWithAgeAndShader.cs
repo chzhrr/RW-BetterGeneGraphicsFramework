@@ -204,7 +204,7 @@ namespace BetterGeneGraphicsFramework
                     string hediff = isMissingBodyPart ? "MissingBodyPart" : request.Substring(dlmIndex + 3);
                     string bodyPart = isMissingBodyPart
                         ? request.Replace("!", string.Empty)
-                        : request.Substring(0, dlmIndex).Replace("!", string.Empty);
+                        : request.Substring(0, dlmIndex - 1).Replace("!", string.Empty);
 
                     // hediff exists when !bodyPart (Missing hediff)
                     // or Global-- hediff
