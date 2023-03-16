@@ -52,7 +52,7 @@ namespace BetterGeneGraphicsFramework
                 // num, scale
                 new CodeInstruction(OpCodes.Ldloca, 1),
                 // bodyGraphicScale
-                new CodeInstruction(OpCodes.Ldloca, 0),
+                new CodeInstruction(OpCodes.Ldloc, 0),
                 // v, offsets
                 new CodeInstruction(OpCodes.Ldloca_S, 5),
                 new CodeInstruction(OpCodes.Call, postProcessMI)
@@ -61,7 +61,7 @@ namespace BetterGeneGraphicsFramework
         }
 
         public static void PostProcess(GeneDef geneDef, Pawn pawn, Rot4 bodyFacing, ref float num,
-            ref Vector2 bodyGraphicScale, ref Vector3 v)
+            Vector2 bodyGraphicScale, ref Vector3 v)
         {
             BetterTailRendering extension = geneDef.GetModExtension<BetterTailRendering>();
             if (extension != null)
