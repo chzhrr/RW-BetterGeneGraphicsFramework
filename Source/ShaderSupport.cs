@@ -1,14 +1,12 @@
 ﻿using UnityEngine;
 using Verse;
+using static Verse.PawnRenderNodeProperties;
 
 namespace BetterGeneGraphicsFramework
 {
     public class ShaderSupport : DefModExtension
     {
-        public ShaderTypeDef shaderType;
-        public GeneColorType colorType;
-        public GeneColorType colorTwoType;
-        public Color color = Color.white;
+        public AttachmentColorType? colorTwoType;
         public Color colorTwo = Color.white;
     }
 }

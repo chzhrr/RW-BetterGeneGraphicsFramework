@@ -25,7 +25,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\1.5\Assemblies\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -61,15 +61,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FemaleBBBodyTypeSupport.cs" />
-    <Compile Include="GeneGraphicsHelper.cs" />
+    <Compile Include="PawnRenderNodeWorker_GeneAttachment.cs" />
+    <Compile Include="PawnRenderNode_GeneAttachment.cs" />
     <Compile Include="ShaderSupport.cs" />
-    <Compile Include="BetterTailRendering.cs" />
+    <Compile Include="WithBodyTypeOffset.cs" />
     <Compile Include="BodyTypeOffset.cs" />
     <Compile Include="GraphicsWithAge.cs" />
-    <Compile Include="DebugActions.cs" />
-    <Compile Include="HarmonyPatcher.cs" />
-    <Compile Include="Patch_BetterTailRendering.cs" />
-    <Compile Include="Patch_ResolveGraphicsWithAgeAndShader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
