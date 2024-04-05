@@ -63,6 +63,7 @@
     <Compile Include="FemaleBBBodyTypeSupport.cs" />
     <Compile Include="PawnRenderNodeWorker_GeneAttachment.cs" />
     <Compile Include="PawnRenderNode_GeneAttachment.cs" />
+    <Compile Include="PawnRenderNode_GeneHeadAttachment.cs" />
     <Compile Include="ShaderSupport.cs" />
     <Compile Include="WithBodyTypeOffset.cs" />
     <Compile Include="BodyTypeOffset.cs" />
