@@ -6,6 +6,9 @@ using Verse;
 
 namespace BetterGeneGraphicsFramework
 {
+    /// <summary>
+    /// Customize texture paths with ages and hediffs.
+    /// </summary>
     public class PawnRenderNode_GeneAttachment : PawnRenderNode
     {
         public PawnRenderNode_GeneAttachment(Pawn pawn, PawnRenderNodeProperties props, PawnRenderTree tree) 
@@ -118,6 +121,8 @@ namespace BetterGeneGraphicsFramework
                 }
 
                 List<string> allowedPaths = new List<string>();
+                // simply assume same count for all stages
+                // can simply repeat if not the case
                 int texCountPerAgeStage = paths.Count / ages.Count;
                 // left inclusive
                 int ageStage = ages.FindLastIndex((x) => x <= pawn.ageTracker.AgeBiologicalYearsFloat);

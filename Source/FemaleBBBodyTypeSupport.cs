@@ -4,6 +4,9 @@ using Verse;
 
 namespace BetterGeneGraphicsFramework
 {
+    /// <summary>
+    /// Support mod "FemaleBB BodyType Support".
+    /// </summary>
     public static class FemaleBBBodyTypeSupport
     {
         private static bool _checked;

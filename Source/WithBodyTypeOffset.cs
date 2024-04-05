@@ -12,5 +12,6 @@ namespace BetterGeneGraphicsFramework
         public BodyTypeOffset bodyTypeOffsetNorth;
         public BodyTypeOffset bodyTypeOffsetSouth;
         public BodyTypeOffset bodyTypeOffsetEast;
+        // west is flipped
     }
 }
