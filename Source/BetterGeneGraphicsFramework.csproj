@@ -61,7 +61,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FemaleBBBodyTypeSupport.cs" />
-    <Compile Include="PawnRenderNodeWorker_GeneAttachment.cs" />
+    <Compile Include="PawnRenderNodeWorker_GeneBodyAttachment.cs" />
     <Compile Include="PawnRenderNode_GeneAttachment.cs" />
     <Compile Include="PawnRenderNode_GeneHeadAttachment.cs" />
     <Compile Include="ShaderSupport.cs" />

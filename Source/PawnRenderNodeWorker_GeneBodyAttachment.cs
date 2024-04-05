@@ -4,43 +4,45 @@ using Verse;
 
 namespace BetterGeneGraphicsFramework
 {
-    public class PawnRenderNodeWorker_GeneAttachment : PawnRenderNodeWorker
+    public class PawnRenderNodeWorker_GeneBodyAttachment : PawnRenderNodeWorker_Body
     {
         public override Vector3 OffsetFor(PawnRenderNode node, PawnDrawParms parms, out Vector3 pivot)
         {
             Vector3 anchorOffset = Vector3.zero;
-            // pivot = PivotFor(node, parms);
+            // for rotation
+            pivot = PivotFor(node, parms);
             WithBodyTypeOffset extension = node.gene?.def.GetModExtension<WithBodyTypeOffset>();
             if (node.Props.drawData != null)
             {
-                Vector3 vector = node.Props.drawData.OffsetForRot(parms.facing);
+                Vector3 rotOffset = node.Props.drawData.OffsetForRot(parms.facing);
                 Vector3 bodyTypeOffset = Vector3.zero;
                 if (node.Props.drawData.scaleOffsetByBodySize && parms.pawn.story != null)
                 {
                     Vector2 bodyGraphicScale = parms.pawn.story.bodyType.bodyGraphicScale;
-                    float num = (bodyGraphicScale.x + bodyGraphicScale.y) / 2f;
+                    float scale = (bodyGraphicScale.x + bodyGraphicScale.y) / 2f;
                     if (extension != null)
                     {
                         bool hasBabyOrChildBodyType = PawnHasBabyOrChildBodyType(parms.pawn);
                         if ((extension.disableBodyTypeScaleForAdult && !hasBabyOrChildBodyType)
                             || (extension.disableBodyTypeScaleForChildren && hasBabyOrChildBodyType))
                         {
-                            // Don't change bodyGraphicScale, it's used to scale the root location
-                            // Scaling is passed to new Vector3(graphicData.drawScale * num, 1f, graphicData.drawScale * num)
-                            // Where float num = (bodyGraphicScale.x + bodyGraphicScale.y) / 2f;
-                            num = 1;
+                            scale = 1;
                         }
                     }
-                    vector *= num;
+                    rotOffset *= scale;
                 }
                 if (extension != null)
                 {
                     bodyTypeOffset = GetBodyTypeOffsetWithFacing(parms.pawn, parms.facing, extension);
                 }
-                anchorOffset += vector + bodyTypeOffset;
+                pivot += bodyTypeOffset;
+                anchorOffset += rotOffset + bodyTypeOffset;
             }
             anchorOffset += node.DebugOffset;
-            pivot = anchorOffset;
+            if (node.AnimationWorker != null && node.AnimationWorker.Enabled() && !parms.flags.FlagSet(PawnRenderFlags.Portrait))
+            {
+                anchorOffset += node.AnimationWorker.OffsetAtTick(node.tree.AnimationTick, parms);
+            }
             return anchorOffset;
 
             bool PawnHasBabyOrChildBodyType(Pawn pawn)
