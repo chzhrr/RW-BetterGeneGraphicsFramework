@@ -84,6 +84,61 @@ namespace BetterGeneGraphicsFramework
             return color;
         }
 
+        /// <summary>
+        /// Modified PawnRenderNode.TexPathFor to support fixed index graphics.
+        /// </summary>
+        protected string BaseTexPathFor(Pawn pawn)
+        {
+            if (Props.bodyTypeGraphicPaths != null)
+            {
+                foreach (BodyTypeGraphicData bodyTypeGraphicPath in Props.bodyTypeGraphicPaths)
+                {
+                    if (pawn.story.bodyType == bodyTypeGraphicPath.bodyType)
+                    {
+                        return bodyTypeGraphicPath.texturePath;
+                    }
+                }
+            }
+            GameComponent_AlternateGraphics comp = Current.Game.GetComponent<GameComponent_AlternateGraphics>();
+            int ind = -1;
+            if (comp != null)
+            {
+                ind = comp.GetFixedIndex(pawn, gene);
+            }
+            if (pawn.gender == Gender.Female)
+            {
+                if (!props.texPathsFemale.NullOrEmpty())
+                {
+                    if (ind == -1)
+                    {
+                        using (new RandBlock(TexSeedFor(pawn)))
+                        {
+                            return props.texPathsFemale.RandomElement();
+                        }
+                    }
+                    return props.texPathsFemale[ind % props.texPathsFemale.Count];
+                    
+                }
+                if (!props.texPathFemale.NullOrEmpty())
+                {
+                    return props.texPathFemale;
+                }
+            }
+            if (!props.texPaths.NullOrEmpty())
+            {
+                if (ind == -1)
+                {
+                    using (new RandBlock(TexSeedFor(pawn)))
+                    {
+                        return props.texPaths.RandomElement();
+                    }
+                }
+                return props.texPaths[ind % props.texPaths.Count];
+            }
+            return props.texPath;
+        }
+
+
         protected override string TexPathFor(Pawn pawn)
         {
             GraphicsWithAge extension = gene.def.GetModExtension<GraphicsWithAge>();
@@ -117,7 +172,7 @@ namespace BetterGeneGraphicsFramework
                     Log.ErrorOnce(
                         "[Better Gene Graphics Framework] No valid graphicPaths found, check your settings!",
                         1110665686);
-                    return base.TexPathFor(pawn);
+                    return BaseTexPathFor(pawn);
                 }
 
                 List<string> allowedPaths = new List<string>();
@@ -131,7 +186,7 @@ namespace BetterGeneGraphicsFramework
                     Log.ErrorOnce(
                         "[Better Gene Graphics Framework] Pawn's age is not in ages, check your ages settings!",
                         111031659);
-                    return base.TexPathFor(pawn);
+                    return BaseTexPathFor(pawn);
                 }
                 List<(string, string)> bodyPartHediffs = new List<(string, string)>();
                 if (!bodyPartExpressions.NullOrEmpty())
@@ -150,7 +205,16 @@ namespace BetterGeneGraphicsFramework
                 }
                 if (allowedPaths.Count == 0)
                 {
-                    return base.TexPathFor(pawn);
+                    return BaseTexPathFor(pawn);
+                }
+                GameComponent_AlternateGraphics comp = Current.Game.GetComponent<GameComponent_AlternateGraphics>();
+                if (comp != null)
+                {
+                    int ind = comp.GetFixedIndex(pawn, gene);
+                    if (ind != -1)
+                    {
+                        return allowedPaths[ind % allowedPaths.Count];
+                    }
                 }
                 using (new RandBlock(TexSeedFor(pawn)))
                 {
@@ -158,7 +222,7 @@ namespace BetterGeneGraphicsFramework
                 }
             }
 
-            return base.TexPathFor(pawn);
+            return BaseTexPathFor(pawn);
 
             List<(string, string)> BodyPartHediffs()
             {

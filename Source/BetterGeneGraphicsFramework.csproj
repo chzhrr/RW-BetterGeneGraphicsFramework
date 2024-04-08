@@ -58,9 +58,17 @@
       <HintPath>..\..\..\RimWorldWin64_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>..\..\..\RimWorldWin64_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DebugAction.cs" />
+    <Compile Include="Dialog_AlternateGraphics.cs" />
     <Compile Include="FemaleBBBodyTypeSupport.cs" />
+    <Compile Include="GameComponent_AlternateGraphics.cs" />
+    <Compile Include="GeneGraphicsData.cs" />
     <Compile Include="PawnRenderNodeWorker_GeneBodyAttachment.cs" />
     <Compile Include="PawnRenderNode_GeneAttachment.cs" />
     <Compile Include="PawnRenderNode_GeneHeadAttachment.cs" />
