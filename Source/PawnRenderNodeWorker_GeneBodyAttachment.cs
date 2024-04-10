@@ -12,10 +12,12 @@ namespace BetterGeneGraphicsFramework
             // for rotation
             pivot = PivotFor(node, parms);
             WithBodyTypeOffset extension = node.gene?.def.GetModExtension<WithBodyTypeOffset>();
+            Vector3 bodyTypeOffset = Vector3.zero;
+            Vector3 rotOffset = Vector3.zero;
             if (node.Props.drawData != null)
             {
-                Vector3 rotOffset = node.Props.drawData.OffsetForRot(parms.facing);
-                Vector3 bodyTypeOffset = Vector3.zero;
+                rotOffset = node.Props.drawData.OffsetForRot(parms.facing);
+               
                 if (node.Props.drawData.scaleOffsetByBodySize && parms.pawn.story != null)
                 {
                     Vector2 bodyGraphicScale = parms.pawn.story.bodyType.bodyGraphicScale;
@@ -31,14 +33,21 @@ namespace BetterGeneGraphicsFramework
                     }
                     rotOffset *= scale;
                 }
-                if (extension != null)
-                {
-                    bodyTypeOffset = GetBodyTypeOffsetWithFacing(parms.pawn, parms.facing, extension);
-                }
-                pivot += bodyTypeOffset;
-                anchorOffset += rotOffset + bodyTypeOffset;
             }
-            anchorOffset += node.DebugOffset;
+            if (extension != null)
+            {
+                // for babies, parms.facing is LayingFacing()
+                Rot4 facing = parms.facing;
+                // fix offset for portrait which always use South
+                if (parms.Portrait && parms.pawn.DevelopmentalStage.Baby())
+                {
+                    facing = Rot4.South;
+                }
+                bodyTypeOffset = GetBodyTypeOffsetWithFacing(parms.pawn, facing, extension);
+            }
+            pivot += bodyTypeOffset;
+            anchorOffset += rotOffset + bodyTypeOffset + node.DebugOffset;
+            
             if (node.AnimationWorker != null && node.AnimationWorker.Enabled() && !parms.flags.FlagSet(PawnRenderFlags.Portrait))
             {
                 anchorOffset += node.AnimationWorker.OffsetAtTick(node.tree.AnimationTick, parms);
